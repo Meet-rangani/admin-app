@@ -3,7 +3,7 @@ import { context } from "../context";
 
 export default function Product() {
 
-  const { products, popupref, handlepopup, showPopup, cancelpopup, addproduct, handleproduct, deleteproduct, productdata, editproduct, handlesearch } = useContext(context)
+  const { products, popupref, handlepopup, showPopup, cancelpopup, addproduct, handleproduct, deleteproduct, productdata, editproduct, handlesearch, handlephoto } = useContext(context)
 
   return (
     <div className="container py-4">
@@ -34,7 +34,7 @@ export default function Product() {
                 <td>{product.price}</td>
                 <td><img src={"product.photo"} style={{ width: "80px", height: "80px", objectFit: "cover" }}/></td>
                 <td>
-                  <button className="btn btn-sm btn-outline-primary me-2" onClick={editproduct}>Edit</button>
+                  <button className="btn btn-sm btn-outline-primary me-2" onClick={() => editproduct(product._id)}>Edit</button>
                   <button className="btn btn-sm btn-outline-danger" onClick={() => deleteproduct(product._id)}>Delete</button>
                 </td>
               </tr>
@@ -45,7 +45,9 @@ export default function Product() {
 
       <div className={`popupBox ${showPopup ? "active" : ""}`} ref={popupref}>
         <div className="card">
-          <h4 className="mb-3">Add New Product</h4>
+          <div className="text-center border rounded mb-2" style={{height: "100px", width: "100px"}}>
+            <p className="justify-center" onClick={handlephoto}>Select Photo</p>
+          </div>
           <input type="text" placeholder="Product Name" className="form-control mb-2" name="name" onChange={handleproduct} value={productdata.name}/>
           <input type="text" placeholder="Description" className="form-control mb-2" name="description" onChange={handleproduct} value={productdata.description}/>
           <input type="number" placeholder="Price" className="form-control mb-2" name="price" onChange={handleproduct} value={productdata.price}/>

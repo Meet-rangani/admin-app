@@ -251,15 +251,24 @@ export function Authcontext({ children }) {
     }
 
     //edit product
-    async function editproduct(id){
+    async function editproduct(id, product){
         setshowPopup(!showPopup)
         try{
             await axios.put(`http://localhost:5000/api/products/update/${id}`);
             toast.success("Product Edited successfully 🎉")
-            getproducts();
+            console.log(products({
+                name: product.name || "",
+                description: product.description || "",
+                price: product.price || "",
+                photo: product.photo || ""
+            }))
         }catch(err){
             console.log(err);   
         }
+    }
+
+    function handlephoto(){
+        console.log("");
     }
 
     //delete product
@@ -308,7 +317,8 @@ export function Authcontext({ children }) {
                     handleproduct,
                     deleteproduct,
                     productdata,
-                    editproduct
+                    editproduct,
+                    handlephoto
                 }} >
             {children}
         </context.Provider>

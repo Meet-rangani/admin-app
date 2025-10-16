@@ -12,7 +12,7 @@ const Registration = () => {
         <div className="col-md-8 ">
           <div className="card shadow-lg p-4 rounded h-100vh">
             <h3 className="text-center mb-4">Registration Form</h3>
-            <form onSubmit={handleregistersubmit}>
+            <form onSubmit={handleregistersubmit} style={{width: "100%"}}>
 
               <div className="mb-3 d-flex gap-3">
                 {/* First Name */}
