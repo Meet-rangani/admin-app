@@ -7,7 +7,7 @@ import { context } from "../context";
 
 const AdminSidebar = () => {
 
-  const { open, setOpen } = useContext(context)
+  const { open, setOpen, handlelogout } = useContext(context)
 
   return (
     <div className="bg-dark text-white d-flex flex-column" style={{ width: open ? "220px" : "60px", height: "100vh", transition: "width 0.3s", position: "sticky", top: "56px"}} >
@@ -37,7 +37,7 @@ const AdminSidebar = () => {
           </Link>
         </li>
         <li className="nav-item mb-2">
-          <Link to="/login" className="nav-link text-white d-flex align-items-center">
+          <Link to="/login" className="nav-link text-white d-flex align-items-center" onClick={handlelogout}>
             <FaSignOutAlt className="me-2" />
             {open && "Logout"}
           </Link>

@@ -13,10 +13,6 @@ export function Authcontext({ children }) {
     const [showToast, setShowToast] = useState(false);
     const [user, setUser] = useState(null);
     const [login, setlogin] = useState({ username: "", password: "" });
-    const [admin, setadmin] = useState({
-        username : "admin@123.com",
-        password : "admin"
-    })
 
     const navigate = useNavigate();
 
@@ -62,7 +58,7 @@ export function Authcontext({ children }) {
             terms: false,
         });
         } catch (err) {
-        toast.error("Invalid Email or Password!");
+            toast.error("Invalid Email or Password!");
         }
     };
 
@@ -71,12 +67,11 @@ export function Authcontext({ children }) {
         setlogin({ ...login, [e.target.name]: e.target.value });
     }
 
+    const admin = { username : "admin@123.com", password : "admin" }
+
     async function handlelogin() {
         try {
-            if (
-            login.username === admin.username &&
-            login.password === admin.password
-            ){
+            if ( login.username === admin.username && login.password === admin.password ){
                 navigate("./admin/allusers");
                 toast.success("Admin Login Successfully 🎉");
                 return;
@@ -116,16 +111,21 @@ export function Authcontext({ children }) {
         setdisplay(false);
     }
 
+    //click outside then close popup
     const dropdownRef = useRef(null);
+    const popupref = useRef(null);
     useEffect(() => {
         function handleClickOutside(e) {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setdisplay(false);
             }
+            if (!popupref.current.contains(e.target)) {
+                setshowPopup(false);
+            }
         }
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [setdisplay]);
+    }, []);
 
     //profile page
     useEffect(() => {
@@ -134,19 +134,17 @@ export function Authcontext({ children }) {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
 
-        axios
-            .get(`http://localhost:5000/api/auth/user/${parsedUser.id}`)
-            .then((res) => {
-            setUser(res.data.user);
+        axios .get(`http://localhost:5000/api/auth/user/${parsedUser.id}`) .then((res) => {
+                setUser(res.data.user);
             })
             .catch((err) => {
-            console.error("Error fetching user:", err);
+                console.error("Error fetching user:", err);
             });
         }
     }, []);
 
+    //edituser in profile page
     function handleedit(updatedData) {
-
         axios.put(`http://localhost:5000/api/auth/updateuser/${user._id}`, updatedData)
         .then(res => {
             toast.success("Profile updated successfully 🎉");
@@ -168,9 +166,112 @@ export function Authcontext({ children }) {
     }, []);
 
     //cart page
-    function handlecart(){
+    function handlecart(product){
         toast.success("Added to cart!");
-        navigate("/Cart")
+        navigate("/cart", { state: { product } });
+    }
+
+    //delete user  
+    function handledelete(id){
+        axios.delete(`http://localhost:5000/api/auth/user/${id}`)
+        .then(res =>{
+            setUser(res.data.user);
+            console.log(res.data.user);
+            toast.success("User Delete successfully 🎉");
+        })
+        .catch(err =>{
+            console.log(err)
+        })
+    }
+
+    //get products admin side
+    const[products, setproducts] = useState([])
+    const getproducts = async() =>{
+        try{
+            const response = await axios.get("http://localhost:5000/api/products/all")
+            setproducts(response.data)
+        }catch(err){
+            console.log(err)
+        }
+    }
+    useEffect(()=> {
+        getproducts()
+    },[])
+
+    //product popup
+    const[showPopup, setshowPopup] = useState(false)
+    function handlepopup(){
+        setshowPopup(!showPopup)
+    }
+
+    function cancelpopup(){
+        setshowPopup(false)
+    }
+
+    //search product
+    async function handlesearch(){
+        console.log("hello");
+        try{
+            await axios.get("http://localhost:5000/api/products/id")
+            setproducts(response.data);
+        }
+        catch(err){
+            console.log(err);
+        }
+    }
+
+    //add product 
+    const[productdata, setproductdata] = useState({
+        name: "",
+        description: "",
+        price: "",
+        photo: ""
+    })
+    function handleproduct(e){
+        setproductdata({...productdata, [e.target.name]: e.target.value})
+    }
+
+    async function addproduct(e){
+        e.preventDefault()
+        try{
+            const response = await axios.post("http://localhost:5000/api/products/add",productdata)
+            setproductdata({
+                name: "",
+                description: "",
+                price: "",
+                photo: ""
+            })
+            toast.success("Product Addedd successfully 🎉")
+            cancelpopup();
+            getproducts();
+        }
+        catch(err){
+            console.log(err)
+        }
+    }
+
+    //edit product
+    async function editproduct(id){
+        setshowPopup(!showPopup)
+        try{
+            await axios.put(`http://localhost:5000/api/products/update/${id}`);
+            toast.success("Product Edited successfully 🎉")
+            getproducts();
+        }catch(err){
+            console.log(err);   
+        }
+    }
+
+    //delete product
+    async function deleteproduct(id) {
+        // window.confirm("Are you sure you want to delete this Product?")
+        try {
+            await axios.delete(`http://localhost:5000/api/products/${id}`);
+            toast.success("Product Deleted successfully 🎉");
+            getproducts();
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     return (
@@ -194,8 +295,20 @@ export function Authcontext({ children }) {
                     handleprofile,
                     handleedit,
                     dropdownRef,
+                    popupref,
                     user,
-                    handlecart
+                    handlecart,
+                    handledelete,
+                    products,
+                    handlepopup,
+                    showPopup,
+                    cancelpopup,
+                    addproduct,
+                    handlesearch,
+                    handleproduct,
+                    deleteproduct,
+                    productdata,
+                    editproduct
                 }} >
             {children}
         </context.Provider>

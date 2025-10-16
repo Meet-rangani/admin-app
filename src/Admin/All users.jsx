@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from "react";
+import axios from "axios";
+import { context } from "../context";
 
-export default function UserDataTable() {
+export default function UsersTable() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+  const { handleedit, handledelete } = useContext(context)
 
   useEffect(() => {
     fetchUsers();
@@ -12,150 +15,60 @@ export default function UserDataTable() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      
-      // AJAX call using fetch
-      const response = await fetch('http://localhost:5000/api/auth/users');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-      
-      const data = await response.json();
-      // Handle response structure: { message: "...", users: [...] }
-      setUsers(data.users || data);
-      setError(null);
+      const response = await axios.get("http://localhost:5000/api/auth/users");
+      setUsers(response.data.users)
     } catch (err) {
-      setError(err.message);
+      console.log(err.response?.data?.message || "Failed to fetch users");
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-          <p className="mt-4 text-gray-600">Loading users...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
-          <h3 className="text-red-800 font-semibold mb-2">Error Loading Users</h3>
-          <p className="text-red-600">{error}</p>
-          <button 
-            onClick={fetchUsers}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
+    return <p className="p-6 text-lg text-blue-600">Loading users...</p>;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-indigo-600 p-3 rounded-lg">
-                <span className="text-white text-2xl">👥</span>
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">User Management</h1>
-                <p className="text-gray-500 mt-1">Total Users: {users.length}</p>
-              </div>
-            </div>
-            <button 
-              onClick={fetchUsers}
-              className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-md"
-            >
-              🔄 Refresh
-            </button>
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
-                  <th className="px-6 py-4 text-left text-sm font-semibold">#</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold">First Name</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold">Last Name</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold">Email</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold">Phone</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold">Gender</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold">Country</th>
+    <div className="p-6">
+      <h2 className="text-2xl font-bold mb-4">User List</h2>
+      <div className="overflow-x-auto shadow-lg rounded-lg p-3">
+        <table className="table-auto w-full border-collapse border border-gray-300 w-100">
+          <thead className="bg-gray-200 text-center">
+            <tr>
+              <th className="border border-gray-300 px-4 py-2">First Name</th>
+              <th className="border border-gray-300 px-4 py-2">Last Name</th>
+              <th className="border border-gray-300 px-4 py-2">Email</th>
+              <th className="border border-gray-300 px-4 py-2">Phone</th>
+              <th className="border border-gray-300 px-4 py-2">Gender</th>
+              <th className="border border-gray-300 px-4 py-2">Country</th>
+              <th className="border border-gray-300 px-4 py-2">Accepted Terms</th>
+              <th className="border border-gray-300 px-4 py-2">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.length > 0 ? (
+              users.map((user, index) => (
+                <tr key={index} className="text-center hover:bg-gray-50">
+                  <td className="border border-gray-300 px-4 py-2">{user.fname}</td>
+                  <td className="border border-gray-300 px-4 py-2">{user.lname}</td>
+                  <td className="border border-gray-300 px-4 py-2">{user.email}</td>
+                  <td className="border border-gray-300 px-4 py-2">{user.phone}</td>
+                  <td className="border border-gray-300 px-4 py-2">{user.gender}</td>
+                  <td className="border border-gray-300 px-4 py-2">{user.country}</td>
+                  <td className="border border-gray-300 px-4 py-2"> ✅ Yes </td>
+                  <td className="border border-gray-300 px-4 py-2 d-flex gap-2">
+                    <button className="bg-success border-0 text-light" onClick={handleedit}>Edit</button>
+                    <button className="bg-danger border-0 text-light" onClick={() => handledelete(user._id)}>Delete</button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {users.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
-                      <div className="text-6xl mb-3">👥</div>
-                      <p className="text-lg">No users found</p>
-                    </td>
-                  </tr>
-                ) : (
-                  users.map((user, index) => (
-                    <tr 
-                      key={user._id || index} 
-                      className="border-b border-gray-200 hover:bg-indigo-50 transition"
-                    >
-                      <td className="px-6 py-4 text-sm text-gray-700 font-medium">
-                        {index + 1}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-800 font-medium">
-                        {user.fname}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-800 font-medium">
-                        {user.lname}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <div className="flex items-center gap-2 text-gray-700">
-                          <span>📧</span>
-                          {user.email}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <div className="flex items-center gap-2 text-gray-700">
-                          <span>📱</span>
-                          {user.phone}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
-                          user.gender === 'Male' 
-                            ? 'bg-blue-100 text-blue-700' 
-                            : 'bg-pink-100 text-pink-700'
-                        }`}>
-                          <span>{user.gender === 'Male' ? '👨' : '👩'}</span>
-                          {user.gender}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <div className="flex items-center gap-2 text-gray-700">
-                          <span>🌍</span>
-                          {user.country}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center py-4"> No users found </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

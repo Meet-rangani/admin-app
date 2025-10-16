@@ -12,7 +12,6 @@ function Login() {
       <div className="card shadow-lg p-4" style={{ width: 400, borderRadius: 20, margin: "40px"}}>
         <h2 className="text-center mb-4 fw-bold">Welcome Back 👋</h2>
 
-        {/* Username */}
         <div className="mb-3 input-group">
           <span className="input-group-text bg-white border-end-0">
             <FaUser />
@@ -20,7 +19,6 @@ function Login() {
           <input type="text" className="form-control border-start-0" value={login.username} name="username" placeholder="Enter username" onChange={handlelogindata} />
         </div>
 
-        {/* Password */}
         <div className="mb-3 input-group">
           <span className="input-group-text bg-white border-end-0">
             <FaLock />
@@ -28,7 +26,6 @@ function Login() {
           <input type="password" className="form-control border-start-0" value={login.password} name="password" placeholder="Enter password" onChange={handlelogindata} />
         </div>
 
-        {/* Login Button */}
         <button className="btn btn-primary w-100 fw-bold rounded-pill" onClick={handlelogin}>Login</button>
       </div>
 

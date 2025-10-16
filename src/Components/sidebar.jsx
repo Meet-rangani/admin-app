@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaHome, FaInfoCircle, FaEnvelope, FaSignInAlt, FaUserPlus, FaSignOutAlt } from "react-icons/fa";
+import { FaHome, FaInfoCircle, FaEnvelope, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaCartPlus } from "react-icons/fa";
 import { useContext } from "react";
 import { context } from "../context";
 
 const Sidebar = () => {
 
-  const { user, open, setOpen } = useContext(context)
+  const { user, open, setOpen, handlelogout } = useContext(context)
 
   return (
     <div className="bg-dark text-white d-flex flex-column" style={{ width: open ? "220px" : "60px", height: "100vh", transition: "width 0.3s", position: "sticky", top: "56px"}} >
@@ -49,6 +49,23 @@ const Sidebar = () => {
               <Link to="/registration" className="nav-link text-white d-flex align-items-center">
                 <FaUserPlus className="me-2" />
                 {open && "Registration"}
+              </Link>
+            </li>
+          </>
+        )}
+
+        {user && (
+          <>
+            <li className="nav-item mb-2">
+              <Link to="/cart" className="nav-link text-white d-flex align-items-center">
+                <FaCartPlus className="me-2" />
+                {open && "Cart"}
+              </Link>
+            </li>
+            <li className="nav-item mb-2">
+              <Link to="/login" className="nav-link text-white d-flex align-items-center" onClick={handlelogout}>
+                <FaSignOutAlt className="me-2" />
+                {open && "Logout"}
               </Link>
             </li>
           </>

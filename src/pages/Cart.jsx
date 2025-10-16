@@ -1,15 +1,17 @@
-import React from 'react'
-import { FaShoppingCart } from 'react-icons/fa'
+import { useLocation } from "react-router-dom";
 
-function Cart() {
+export default function Cart() {
+  const location = useLocation();
+  const { product } = location.state || {}; // 👈 get product data from navigation
+
+  if (!product) return <p>No product selected.</p>;
+
   return (
-    <div className='container-fluid mt-3'>
-        <div className='d-flex justify-content-center align-items-center gap-3'>
-            <FaShoppingCart className='fs-2'/>
-            <h1>Welcome to Your Cart!</h1>
-        </div>
+    <div className="container py-4">
+      <h2>🛒 {product.name}</h2>
+      <img src={product.photo} alt={product.name} style={{ width: 250, height: 250, objectFit: "cover" }} />
+      <p>{product.description}</p>
+      <h5 className="text-success">₹{product.price}</h5>
     </div>
-  )
+  );
 }
-
-export default Cart
