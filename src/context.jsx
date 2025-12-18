@@ -1,4 +1,4 @@
-import { useContext, useRef } from "react";
+import { useRef } from "react";
 import { useEffect } from "react";
 import { useState, createContext } from "react";
 import { useNavigate } from "react-router-dom";
@@ -11,8 +11,6 @@ export function Authcontext({ children }) {
     const [open, setOpen] = useState(true);
     const [display, setdisplay] = useState(false);
     const [showToast, setShowToast] = useState(false);
-    const [user, setUser] = useState(null);
-    const [login, setlogin] = useState({ username: "", password: "" });
 
     const navigate = useNavigate();
 
@@ -37,9 +35,7 @@ export function Authcontext({ children }) {
         e.preventDefault();
 
         try {
-        const response = await axios.post(
-            "http://localhost:5000/api/auth/register",
-            formdata,
+        await axios.post( "http://localhost:5000/api/auth/register", formdata,
             {
             headers: { "content-Type": "application/json" },
             }
@@ -63,17 +59,20 @@ export function Authcontext({ children }) {
     };
 
     //login page
+    const [login, setlogin] = useState({ username: "", password: "" });
+    const [user, setUser] = useState(null);
+    const admin = { username : "admin@123.com", password : "admin" }
+
     function handlelogindata(e) {
         setlogin({ ...login, [e.target.name]: e.target.value });
     }
-
-    const admin = { username : "admin@123.com", password : "admin" }
 
     async function handlelogin() {
         try {
             if ( login.username === admin.username && login.password === admin.password ){
                 navigate("./admin/allusers");
                 toast.success("Admin Login Successfully 🎉");
+                setlogin({ username: "", password: "" });
                 return;
             }
             const payload = {
@@ -114,13 +113,17 @@ export function Authcontext({ children }) {
     //click outside then close popup
     const dropdownRef = useRef(null);
     const popupref = useRef(null);
+    const editref = useRef(null)
     useEffect(() => {
         function handleClickOutside(e) {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setdisplay(false);
             }
-            if (!popupref.current.contains(e.target)) {
+            if (popupref.current && !popupref.current.contains(e.target)) {
                 setshowPopup(false);
+            }
+            if(editref.current && !editref.current.contains(e.target)){
+                setedituser(null)
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
@@ -144,8 +147,9 @@ export function Authcontext({ children }) {
     }, []);
 
     //edituser in profile page
-    function handleedit(updatedData) {
-        axios.put(`http://localhost:5000/api/auth/updateuser/${user._id}`, updatedData)
+    async function handleedit(updatedData, id) {
+        
+        await axios.put(`http://localhost:5000/api/auth/updateuser/${id}`, updatedData)
         .then(res => {
             toast.success("Profile updated successfully 🎉");
             setUser(res.data.user);
@@ -163,7 +167,7 @@ export function Authcontext({ children }) {
         if (storedUser) {
             setUser(JSON.parse(storedUser));
         }
-    }, []);
+    }, []); 
 
     //cart page
     function handlecart(product){
@@ -176,20 +180,64 @@ export function Authcontext({ children }) {
         axios.delete(`http://localhost:5000/api/auth/user/${id}`)
         .then(res =>{
             setUser(res.data.user);
-            console.log(res.data.user);
             toast.success("User Delete successfully 🎉");
         })
         .catch(err =>{
             console.log(err)
+            toast.success("User Does not Deleted ");
         })
+    }
+
+    //fetch all user in admin side
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchUsers = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get("http://localhost:5000/api/auth/users");
+            setUsers(response.data.users)
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+    //edit user in admin side
+    const [edituser, setedituser] = useState(false);
+
+    const handlechageuser = (e) => {
+        const { name, value } = e.target;
+        setedituser((prev) => ({ ...prev, [name]: value })); 
+    };
+
+    function handleedituser(user){
+        setedituser(user);
+    }
+
+    async function handleeditadmin(updatedUser, id) {
+        await axios.put(`http://localhost:5000/api/auth/updateuser/${id}`,updatedUser )
+        try{
+            toast.success("Profile updated successfully 🎉");
+            setedituser(null);
+            fetchUsers()
+        }
+        catch(err){
+            console.error("Error updating user:", err);
+            toast.error("Failed to update profile");
+        }
     }
 
     //get products admin side
     const[products, setproducts] = useState([])
     const getproducts = async() =>{
         try{
-            const response = await axios.get("http://localhost:5000/api/products/all")
-            setproducts(response.data)
+            const response = await axios.get("http://localhost:5000/api/products")
+            setproducts(response.data.products)
         }catch(err){
             console.log(err)
         }
@@ -206,21 +254,31 @@ export function Authcontext({ children }) {
 
     function cancelpopup(){
         setshowPopup(false)
+        setproductdata({
+            name: "",
+            description: "",
+            price: "",
+            photo: ""
+        })
     }
 
     //search product
-    async function handlesearch(){
-        console.log("hello");
+    async function handlesearch(searchValue){
         try{
-            await axios.get("http://localhost:5000/api/products/id")
-            setproducts(response.data);
+            let url = "http://localhost:5000/api/products";
+            if (searchValue.trim() !== "") {
+                url += `?name=${searchValue}`;
+            }
+
+            let response = await axios.get(url)
+            setproducts(response.data.products);
         }
         catch(err){
             console.log(err);
         }
     }
 
-    //add product 
+    //add product
     const[productdata, setproductdata] = useState({
         name: "",
         description: "",
@@ -234,7 +292,7 @@ export function Authcontext({ children }) {
     async function addproduct(e){
         e.preventDefault()
         try{
-            const response = await axios.post("http://localhost:5000/api/products/add",productdata)
+            await axios.post("http://localhost:5000/api/products/add",productdata)
             setproductdata({
                 name: "",
                 description: "",
@@ -250,25 +308,40 @@ export function Authcontext({ children }) {
         }
     }
 
-    //edit product
-    async function editproduct(id, product){
-        setshowPopup(!showPopup)
-        try{
-            await axios.put(`http://localhost:5000/api/products/update/${id}`);
-            toast.success("Product Edited successfully 🎉")
-            console.log(products({
-                name: product.name || "",
-                description: product.description || "",
-                price: product.price || "",
-                photo: product.photo || ""
-            }))
-        }catch(err){
-            console.log(err);   
-        }
+    const handlephoto = (e) => {
+        setproductdata({ ...productdata, photo: e.target.files[0] });
+    };
+
+    //edit button product
+    const [editId, setEditId] = useState(null);
+    const[isedit, setisedit] = useState(false)
+
+    function editproduct(product){
+        setproductdata({
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            photo: product.photo
+        })
+        setisedit(true);
+        setshowPopup(true);
+        setEditId(null);
+        setEditId(product._id);
     }
 
-    function handlephoto(){
-        console.log("");
+    //edit product in update button
+    async function updateproduct(){
+        try{
+            await axios.put(`http://localhost:5000/api/products/${editId}`,productdata);
+            toast.success("Product Edited successfully 🎉")
+            getproducts()
+            setisedit(false);
+            setEditId(null);
+            setshowPopup(false);
+        }
+        catch(err){
+            console.log(err)
+        }
     }
 
     //delete product
@@ -305,7 +378,16 @@ export function Authcontext({ children }) {
                     handleedit,
                     dropdownRef,
                     popupref,
+                    editref,
                     user,
+                    edituser,
+                    setedituser,
+                    handleedituser,
+                    users,
+                    loading,
+                    fetchUsers,
+                    handleeditadmin,
+                    handlechageuser,
                     handlecart,
                     handledelete,
                     products,
@@ -318,7 +400,9 @@ export function Authcontext({ children }) {
                     deleteproduct,
                     productdata,
                     editproduct,
-                    handlephoto
+                    handlephoto,
+                    isedit,
+                    updateproduct
                 }} >
             {children}
         </context.Provider>

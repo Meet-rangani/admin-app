@@ -2,7 +2,7 @@ import { useLocation } from "react-router-dom";
 
 export default function Cart() {
   const location = useLocation();
-  const { product } = location.state || {}; // 👈 get product data from navigation
+  const { product } = location.state || {};
 
   if (!product) return <p>No product selected.</p>;
 

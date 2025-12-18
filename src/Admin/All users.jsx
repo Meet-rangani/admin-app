@@ -1,28 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
-import axios from "axios";
+import React, { useContext } from "react";
 import { context } from "../context";
 
 export default function UsersTable() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  const { handleedit, handledelete } = useContext(context)
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get("http://localhost:5000/api/auth/users");
-      setUsers(response.data.users)
-    } catch (err) {
-      console.log(err.response?.data?.message || "Failed to fetch users");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { handleeditadmin, handledelete, edituser, setedituser, handleedituser, handlechageuser, editref,  users, loading } = useContext(context)
 
   if (loading) {
     return <p className="p-6 text-lg text-blue-600">Loading users...</p>;
@@ -49,15 +30,15 @@ export default function UsersTable() {
             {users.length > 0 ? (
               users.map((user, index) => (
                 <tr key={index} className="text-center hover:bg-gray-50">
-                  <td className="border border-gray-300 px-4 py-2">{user.fname}</td>
-                  <td className="border border-gray-300 px-4 py-2">{user.lname}</td>
-                  <td className="border border-gray-300 px-4 py-2">{user.email}</td>
-                  <td className="border border-gray-300 px-4 py-2">{user.phone}</td>
+                  <td className="border border-gray-300 px-4 py-2">{user.fname}</td> 
+                  <td className="border border-gray-300 px-4 py-2">{user.lname}</td> 
+                  <td className="border border-gray-300 px-4 py-2">{user.email}</td> 
+                  <td className="border border-gray-300 px-4 py-2">{user.phone}</td> 
                   <td className="border border-gray-300 px-4 py-2">{user.gender}</td>
-                  <td className="border border-gray-300 px-4 py-2">{user.country}</td>
+                  <td className="border border-gray-300 px-4 py-2">{user.country}</td> 
                   <td className="border border-gray-300 px-4 py-2"> ✅ Yes </td>
                   <td className="border border-gray-300 px-4 py-2 d-flex gap-2">
-                    <button className="bg-success border-0 text-light" onClick={handleedit}>Edit</button>
+                    <button className="bg-success border-0 text-light" onClick={() => handleedituser(user)}>Edit</button>
                     <button className="bg-danger border-0 text-light" onClick={() => handledelete(user._id)}>Delete</button>
                   </td>
                 </tr>
@@ -69,6 +50,37 @@ export default function UsersTable() {
             )}
           </tbody>
         </table>
+
+        {edituser && (
+          <div className="d-flex justify-content-center align-items-center" ref={editref}>
+            <div className="d-flex flex-column align-items-center card p-4 shadow-lg h-auto" style={{ width: "400px", borderRadius: "20px", textAlign: "center", position: "absolute", top: "56px" }}>
+              <h4 style={{marginBottom: "16px"}}>{edituser?.fname} {edituser?.lname}</h4>
+              <input type="text" defaultValue={edituser.fname} className="form-control mb-2" onChange={handlechageuser} name="fname" />
+              <input type="text" defaultValue={edituser.lname} className="form-control mb-2" onChange={handlechageuser} name="lname" />
+              <input type="text" defaultValue={edituser.email} className="form-control mb-2" onChange={handlechageuser} name="email" />
+              <input type="text" defaultValue={edituser.phone} className="form-control mb-2" onChange={handlechageuser} name="phone" />
+              <div className="mb-3 w-100 text-start d-flex gap-3">
+                <input type="radio" className="form-check-input" name="gender" value="Male" checked={edituser.gender === "Male"} onChange={handlechageuser} />
+                <label className="form-check-label">Male</label>  
+                <input type="radio" className="form-check-input" name="gender" value="Female" checked={edituser.gender === "Female"} onChange={handlechageuser}/>
+                <label className="form-check-label">Female</label>
+              </div>
+              <div className="mb-3 w-100">
+                <select className="form-select" name="country" value={edituser.country} onChange={handlechageuser}>
+                  <option value="" disabled>Select Country</option>
+                  <option value="India">India</option>
+                  <option value="USA">USA</option>
+                  <option value="UK">UK</option>
+                  <option value="Canada">Canada</option>
+                </select>
+              </div>
+              <div className="d-flex gap-3">
+                <button className="btn btn-success" onClick={() => handleeditadmin(edituser, edituser._id)}>Update</button>
+                <button className="btn btn-secondary" onClick={() => setedituser(null)}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

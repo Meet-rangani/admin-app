@@ -29,7 +29,7 @@ function Profile() {
     Object.keys(editData).forEach((key) => formData.append(key, editData[key]));
     if (avatarFile) formData.append("avatar", avatarFile);
 
-    await handleedit(formData); 
+    await handleedit(formData, user?._id);
     setIsEditing(false);
   };
 
@@ -37,7 +37,7 @@ function Profile() {
     <div className="d-flex justify-content-center align-items-center">
       <div className="d-flex flex-column align-items-center card p-4 shadow-lg" style={{ width: "400px", borderRadius: "20px", textAlign: "center" }}>
         <Avatar src={avatarPreview} name={user?.fname + " " + user?.lname} size="100" round={true} style={{marginBottom: "15px"}} />
-
+      
         {!isEditing ? (
           <>
             <h4 style={{marginBottom: "16px"}}><strong>Name:</strong> {user?.fname} {user?.lname}</h4>
@@ -58,23 +58,23 @@ function Profile() {
             <input type="email" name="email" value={editData.email} onChange={handleChange} className="form-control mb-2" />
             <input type="text" name="phone" value={editData.phone} onChange={handleChange} className="form-control mb-2" />
             <div className="mb-3 w-100 text-start d-flex gap-3">
-              <input type="radio" className="form-check-input" name="gender" value="Male" checked={"editData.gender"} onChange={handleChange} required />
-              <label className="form-check-label">Male</label>
-              <input type="radio" className="form-check-input" name="gender" value="Female" checked={"editData.gender"} onChange={handleChange}/>
+              <input type="radio" className="form-check-input" name="gender" value="Male" checked={editData.gender === "Male"} onChange={handleChange} required />
+              <label className="form-check-label">Male</label>  
+              <input type="radio" className="form-check-input" name="gender" value="Female" checked={editData.gender === "Female"} onChange={handleChange}/>
               <label className="form-check-label">Female</label>
             </div>
             <div className="mb-3 w-100">
-              <select className="form-select" name="country" onChange={handleChange} required>
+              <select className="form-select" name="country" onChange={handleChange} value={editData.country}>
                 <option value="" disabled>Select Country</option>
                 <option value="India">India</option>
                 <option value="USA">USA</option>
                 <option value="UK">UK</option>
                 <option value="Canada">Canada</option>
               </select>
-            </div>
+            </div>  
 
             <div className="d-flex gap-3 mt-2">
-              <button className="btn btn-success" onClick={handleSave}>Save</button>
+              <button className="btn btn-success" onClick={handleSave}>Update</button>
               <button className="btn btn-secondary" onClick={() => setIsEditing(false)}>Cancel</button>
             </div>
           </>

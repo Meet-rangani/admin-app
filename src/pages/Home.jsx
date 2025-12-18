@@ -10,7 +10,7 @@ const images = [
   "/slider-4.jpeg",
   "/slider-5.jpeg",
   "/slider-6.jpeg",
-  "/slider-7.jpeg",
+  "/slider-7.jpeg", 
   "/slider-8.jpeg",
   "/slider-9.jpeg",
   "/slider-10.jpeg",
@@ -38,20 +38,19 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/products/all") 
+    axios.get("http://localhost:5000/api/products") 
       .then((res) => {
         setProducts(res.data.products || res.data); 
       })
       .catch((err) => console.error("Error fetching products:", err));
   }, []);
 
-  const nextSlide = () => {
-    if (index < images.length - visibleImages) setIndex(index + 1);
-  };
-  const prevSlide = () => {
-    if (index > 0) setIndex(index - 1);
-  };
+  // const nextSlide = () => {
+  //   if (index < images.length - visibleImages) setIndex(index + 1);
+  // };
+  // const prevSlide = () => {
+  //   if (index > 0) setIndex(index - 1);
+  // };
 
   const nextProdSlide = () => {
     if (prodIndex < products.length - visibleImages) setProdIndex(prodIndex + 1);

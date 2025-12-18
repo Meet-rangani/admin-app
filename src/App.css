@@ -121,9 +121,9 @@
   height: auto;
   width: 25%;
   background-color: white;
-  position: fixed;
+  position: absolute;
   top: 50px;
-  left: 50%;
+  left: 56%;
   transform: translateX(-50%);
   display: none;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);

@@ -1,4 +1,3 @@
-import React, { useContext } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -7,7 +6,6 @@ import Login from "./pages/Login";
 import Registration from "./pages/Registration";
 import Header from "./Components/Header";
 import Sidebar from "./Components/sidebar";
-import { context } from "./context";
 import Profile from "./pages/Profile";
 import { ToastContainer } from "react-toastify";
 import Cart from "./pages/Cart";
@@ -17,35 +15,37 @@ import Product from "./Admin/Product";
 import Category from "./Admin/Category";
 
 const App = () => {
-  const { islogin, setislogin } = useContext(context);
   const location = useLocation();
 
   const isAdminRoute = location.pathname.startsWith("/admin");
 
   return (
     <div>
-      {!isAdminRoute && <Header islogin={islogin} setislogin={setislogin} />}
+      <Header />
 
       <div className="d-flex">
-        {!isAdminRoute && <Sidebar islogin={islogin} />}
+        {!isAdminRoute && <Sidebar />}
         <div className="flex-grow-2 w-100">
           <Routes>
+
+            {/* User Routes */}
             <Route>
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
-              <Route path="/login" element={<Login setislogin={setislogin} />} />
+              <Route path="/login" element={<Login />} />
               <Route path="/registration" element={<Registration />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/cart" element={<Cart />} />
             </Route>
-            <Route>
-              <Route path="/" element={<Admin />} >
-                <Route path="admin/allusers" element={<AllUsers />} />
-                <Route path="admin/products" element={<Product />} />
-                <Route path="admin/categories" element={<Category />} />
-              </Route>
+
+            {/* Admin Routes */}
+            <Route path="/admin" element={<Admin />} >
+              <Route path="allusers" element={<AllUsers />} />
+              <Route path="products" element={<Product />} />
+              <Route path="categories" element={<Category />} />  
             </Route>
+
           </Routes>
         </div>  
       </div>
